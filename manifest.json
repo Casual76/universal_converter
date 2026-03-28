@@ -1,0 +1,21 @@
+{
+    "app": {
+        "id": "universal_converter",
+        "name": "Convert to it!",
+        "description": "Convertitore universale",
+        "packageName": "",
+        "iconUrl": "",
+        "category": "Tool",
+        "developer": "Pampa",
+        "screenshots": [],
+        "repository": {
+            "repoOwner": "Casual76",
+            "repoName": "universal_converter",
+            "manifestPath": "manifest.json",
+            "ref": ""
+        },
+        "stable": null,
+        "beta": null,
+        "history": []
+    }
+}
