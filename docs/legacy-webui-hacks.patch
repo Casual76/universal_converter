@@ -1,0 +1,304 @@
+diff --git a/index.html b/index.html
+index f85e0f6..3fdf545 100644
+--- a/index.html
++++ b/index.html
+@@ -1,5 +1,5 @@
+ <!DOCTYPE html>
+-<html lang="en">
++<html lang="it">
+ <head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+@@ -12,7 +12,7 @@
+   <meta name="og:url" content="https://convert.to.it"/>
+   <meta name="og:title" content="Convert to it!"/>
+   <meta name="og:site_name" content="Convert to it!"/>
+-  <meta name="og:description" content="Truly universal online file converter. Private, on-device conversion across mediums."/>
++  <meta name="og:description" content="Convertitore universale privato con conversioni eseguite sul dispositivo."/>
+   <meta name="og:image" content="https://p2r3.github.io/convert/assets/favicon-Bfod-rsk.ico"/>
+   <meta name="theme-color" content="#1C77FF"/>
+   <meta name="og:type" content="website"/>
+@@ -24,26 +24,26 @@
+   <a id="commit-id" href="https://github.com/p2r3/convert"></a>
+ 
+   <div id="file-area">
+-    <h2>Click to add your file</h2>
+-    <p id="drop-hint-text">or drag and drop it here</p>
++    <h2>Scegli un file</h2>
++    <p id="drop-hint-text">oppure trascinalo qui</p>
+   </div>
+   <div id="side-panel">
+-    <button id="mode-button">Advanced mode</button>
++    <button id="mode-button">Modalità avanzata</button>
+   </div>
+ 
+   <div id="format-containers">
+ 
+     <div id="from-container" class="format-container">
+-      <h2>Convert from:</h2>
+-      <input type="text" id="search-from" class="search" placeholder="Search">
++      <h2>Converti da:</h2>
++      <input type="text" id="search-from" class="search" placeholder="Cerca">
+       <div id="from-list" class="format-list">
+ 
+       </div>
+     </div>
+ 
+     <div id="to-container" class="format-container">
+-      <h2>Convert to:</h2>
+-      <input type="text" id="search-to" class="search" placeholder="Search">
++      <h2>Converti in:</h2>
++      <input type="text" id="search-to" class="search" placeholder="Cerca">
+       <div id="to-list" class="format-list">
+ 
+       </div>
+@@ -51,11 +51,11 @@
+ 
+   </div>
+ 
+-  <button id="convert-button" class="disabled">Convert</button>
++  <button id="convert-button" class="disabled">Converti</button>
+ 
+   <div id="popup-bg"></div>
+   <div id="popup">
+-    <h2>Loading tools...</h2>
++    <h2>Caricamento strumenti...</h2>
+   </div>
+ 
+   <script type="module" src="src/main.ts"></script>
+diff --git a/src/global.d.ts b/src/global.d.ts
+index e550594..542e324 100644
+--- a/src/global.d.ts
++++ b/src/global.d.ts
+@@ -12,6 +12,9 @@ declare global {
+       files: FileData[];
+       path: ConvertPathNode[];
+     } | null>;
++    AndroidBridge?: {
++      saveBase64: (fileName: string, mimeType: string, base64: string) => void;
++    };
+   }
+ }
+ 
+diff --git a/src/main.ts b/src/main.ts
+index 0298e2e..9050e48 100644
+--- a/src/main.ts
++++ b/src/main.ts
+@@ -106,7 +106,7 @@ const fileSelectHandler = (event: Event) => {
+ 
+   ui.fileSelectArea.innerHTML = `<h2>
+     ${files[0].name}
+-    ${files.length > 1 ? `<br>... and ${files.length - 1} more` : ""}
++    ${files.length > 1 ? `<br>... e altri ${files.length - 1}` : ""}
+   </h2>`;
+ 
+   // Common MIME type adjustments (to match "mime" library)
+@@ -308,10 +308,10 @@ async function buildOptionList () {
+ ui.modeToggleButton.addEventListener("click", () => {
+   simpleMode = !simpleMode;
+   if (simpleMode) {
+-    ui.modeToggleButton.textContent = "Advanced mode";
++    ui.modeToggleButton.textContent = "Modalità avanzata";
+     document.body.style.setProperty("--highlight-color", "#1C77FF");
+   } else {
+-    ui.modeToggleButton.textContent = "Simple mode";
++    ui.modeToggleButton.textContent = "Modalità semplice";
+     document.body.style.setProperty("--highlight-color", "#FF6F1C");
+   }
+   buildOptionList();
+@@ -338,8 +338,8 @@ async function attemptConvertPath (files: FileData[], path: ConvertPathNode[]) {
+     }
+   }
+ 
+-  ui.popupBox.innerHTML = `<h2>Finding conversion route...</h2>
+-    <p>Trying <b>${pathString}</b>...</p>`;
++  ui.popupBox.innerHTML = `<h2>Ricerca percorso di conversione...</h2>
++    <p>Provo <b>${pathString}</b>...</p>`;
+ 
+   for (let i = 0; i < path.length - 1; i ++) {
+     const handler = path[i + 1].handler;
+@@ -378,8 +378,8 @@ async function attemptConvertPath (files: FileData[], path: ConvertPathNode[]) {
+       deadEndAttempts.push(deadEndPath);
+       window.traversionGraph.addDeadEndPath(path.slice(0, i + 2));
+ 
+-      ui.popupBox.innerHTML = `<h2>Finding conversion route...</h2>
+-        <p>Looking for a valid path...</p>`;
++      ui.popupBox.innerHTML = `<h2>Ricerca percorso di conversione...</h2>
++        <p>Cerco un percorso valido...</p>`;
+       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+ 
+       return null;
+@@ -410,6 +410,15 @@ window.tryConvertByTraversing = async function (
+ }
+ 
+ function downloadFile (bytes: Uint8Array, name: string) {
++  if (window.AndroidBridge) {
++    let binary = "";
++    const chunkSize = 0x8000;
++    for (let i = 0; i < bytes.length; i += chunkSize) {
++      binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
++    }
++    window.AndroidBridge.saveBase64(name, "application/octet-stream", btoa(binary));
++    return;
++  }
+   const blob = new Blob([bytes as BlobPart], { type: "application/octet-stream" });
+   const link = document.createElement("a");
+   link.href = URL.createObjectURL(blob);
+@@ -422,14 +431,14 @@ ui.convertButton.onclick = async function () {
+   const inputFiles = selectedFiles;
+ 
+   if (inputFiles.length === 0) {
+-    return alert("Select an input file.");
++    return alert("Seleziona un file di input.");
+   }
+ 
+   const inputButton = document.querySelector("#from-list .selected");
+-  if (!inputButton) return alert("Specify input file format.");
++  if (!inputButton) return alert("Specifica il formato di partenza.");
+ 
+   const outputButton = document.querySelector("#to-list .selected");
+-  if (!outputButton) return alert("Specify output file format.");
++  if (!outputButton) return alert("Specifica il formato di output.");
+ 
+   const inputOption = allOptions[Number(inputButton.getAttribute("format-index"))];
+   const outputOption = allOptions[Number(outputButton.getAttribute("format-index"))];
+@@ -453,14 +462,14 @@ ui.convertButton.onclick = async function () {
+       inputFileData.push({ name: inputFile.name, bytes: inputBytes });
+     }
+ 
+-    window.showPopup("<h2>Finding conversion route...</h2>");
++    window.showPopup("<h2>Ricerca percorso di conversione...</h2>");
+     // Delay for a bit to give the browser time to render
+     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+ 
+     const output = await window.tryConvertByTraversing(inputFileData, inputOption, outputOption);
+     if (!output) {
+       window.hidePopup();
+-      alert("Failed to find conversion route.");
++      alert("Non ho trovato un percorso di conversione valido.");
+       return;
+     }
+ 
+@@ -469,15 +478,15 @@ ui.convertButton.onclick = async function () {
+     }
+ 
+     window.showPopup(
+-      `<h2>Converted ${inputOption.format.format} to ${outputOption.format.format}!</h2>` +
+-      `<p>Path used: <b>${output.path.map(c => c.format.format).join(" → ")}</b>.</p>\n` +
++      `<h2>Conversione completata: ${inputOption.format.format} → ${outputOption.format.format}</h2>` +
++      `<p>Percorso usato: <b>${output.path.map(c => c.format.format).join(" → ")}</b>.</p>\n` +
+       `<button onclick="window.hidePopup()">OK</button>`
+     );
+ 
+   } catch (e) {
+ 
+     window.hidePopup();
+-    alert("Unexpected error while routing:\n" + e);
++    alert("Errore inatteso durante la conversione:\n" + e);
+     console.error(e);
+ 
+   }
+diff --git a/style.css b/style.css
+index 8b47ce2..f67c337 100644
+--- a/style.css
++++ b/style.css
+@@ -2,6 +2,9 @@ body {
+   margin: 0;
+   font-family: sans-serif;
+   --highlight-color: #1C77FF;
++  background: #f4f6f8;
++  color: #172033;
++  -webkit-tap-highlight-color: transparent;
+ }
+ 
+ #file-input {
+@@ -18,6 +21,8 @@ body {
+   color: white;
+   text-align: center;
+   cursor: pointer;
++  padding: max(18px, env(safe-area-inset-top)) 1rem 1rem;
++  box-sizing: border-box;
+ }
+ 
+ #file-area h2,
+@@ -69,6 +74,7 @@ body {
+ 
+ #format-containers {
+   display: flex;
++  padding-bottom: 110px;
+ }
+ 
+ .format-container {
+@@ -78,6 +84,7 @@ body {
+   width: 50vw;
+   min-height: 70vh;
+   padding: 0.8em 7em;
++  box-sizing: border-box;
+ }
+ .format-container h2 {
+   text-align: center;
+@@ -123,6 +130,7 @@ body {
+   font-family: monospace;
+   word-break: break-word;
+   cursor: pointer;
++  min-height: 44px;
+ }
+ 
+ button.selected {
+@@ -143,6 +151,9 @@ button.selected {
+   background-color: var(--highlight-color);
+   color: white;
+   cursor: pointer;
++  min-width: min(80vw, 360px);
++  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
++  z-index: 3;
+ }
+ 
+ .disabled {
+@@ -181,16 +192,26 @@ button.selected {
+ }
+ 
+ @media only screen and (max-width: 800px) {
++  body {
++    font-size: 15px;
++  }
++  #file-area {
++    min-height: 28svh;
++    height: auto;
++  }
+   #drop-hint-text {
+     display: none;
+   }
+   .format-container {
+     width: 100%;
+     box-sizing: border-box;
+-    padding: 0.8em 4em;
++    min-height: auto;
++    padding: 1rem;
+   }
+   .format-list button {
+     width: 100%;
++    font-size: 0.82rem;
++    text-align: left;
+   }
+   #format-containers {
+     flex-flow: column nowrap;
+@@ -199,12 +220,16 @@ button.selected {
+     width: 80vw;
+   }
+   #side-panel {
+-    width: 50%;
+-    padding: 0.8em;
++    position: static;
++    width: 100%;
++    height: auto;
++    padding: 0.8rem 1rem;
+     text-align: right;
++    background-color: var(--highlight-color);
+   }
+   #side-panel button {
+     font-size: 0.8rem;
+     padding: 10px;
++    max-width: 16rem;
+   }
+ }

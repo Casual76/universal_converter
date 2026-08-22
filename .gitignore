@@ -1,0 +1,10 @@
+.gradle/
+.kotlin/
+build/
+local.properties
+app/build/
+convert/node_modules/
+convert/dist/
+convert/dist-android/
+*.iml
+.idea/
