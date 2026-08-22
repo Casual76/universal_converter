@@ -1,4 +1,5 @@
 import java.security.MessageDigest
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -201,6 +202,16 @@ tasks.register<Zip>("engineAssetPack") {
 /* Android                                                                     */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Release signing, read from an uncommitted `keystore.properties` in the repo
+ * root. Without it the release build is still produced, just unsigned, so a
+ * checkout without the key is not broken - it simply cannot publish.
+ */
+val keystoreProperties: Properties? =
+    rootProject.layout.projectDirectory.file("keystore.properties").asFile
+        .takeIf { it.exists() }
+        ?.let { file -> Properties().apply { file.inputStream().use { load(it) } } }
+
 android {
     namespace = "com.p2r3.convert"
     compileSdk = 36
@@ -216,6 +227,22 @@ android {
         buildConfigField("String", "ENGINE_ASSET_BASE_URL", "\"$engineAssetBaseUrl\"")
     }
 
+    signingConfigs {
+        keystoreProperties?.let { properties ->
+            create("release") {
+                storeFile = file(properties.getProperty("storeFile"))
+                storePassword = properties.getProperty("storePassword")
+                keyAlias = properties.getProperty("keyAlias")
+                keyPassword = properties.getProperty("keyPassword")
+                // The store's publisher checks for a v1 (JAR) signature, which
+                // AGP drops on its own once minSdk is 24 or higher.
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
+            }
+        }
+    }
+
     buildTypes {
         debug {
             // Lets a test build sit next to the installed release version.
@@ -223,6 +250,7 @@ android {
             versionNameSuffix = "-debug"
         }
         release {
+            signingConfig = signingConfigs.findByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

@@ -8,3 +8,4 @@ convert/dist/
 convert/dist-android/
 *.iml
 .idea/
+keystore.properties
