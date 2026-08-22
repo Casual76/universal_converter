@@ -1,3 +1,4 @@
 [submodule "convert"]
 	path = convert
 	url = https://github.com/p2r3/convert.git
+	ignore = untracked
