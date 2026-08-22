@@ -1,29 +1,38 @@
 {
-    "app": {
-        "id": "universal_converter",
-        "name": "Convert to it!",
-        "description": "Convertitore universale",
-        "packageName": "com.p2r3.convert",
-        "iconUrl": "",
-        "category": "Tool",
-        "developer": "Pampa",
-        "screenshots": [],
-        "repository": {
-            "repoOwner": "Casual76",
-            "repoName": "universal_converter",
-            "manifestPath": "manifest.json",
-            "ref": ""
-        },
-        "stable": null,
-        "beta": {
-            "version": "1.0.0",
-            "releaseDate": "2026-03-28",
-            "changelog": "Bozza generata automaticamente dal profilo Convert to it! per la versione 1.0.0. Asset rilevati: app-release.apk.",
-            "releaseTag": "beta-universal_converter-v1.0.0",
-            "apkAsset": "universal_converter-1.0.0.apk",
-            "exeAsset": "",
-            "sizeBytes": 0
-        },
-        "history": []
-    }
+  "app": {
+    "id": "universal-converter",
+    "name": "Convert to it!",
+    "description": "Convertitore universale",
+    "packageName": "com.p2r3.convert",
+    "iconUrl": "",
+    "category": "Tool",
+    "developer": "Pampa",
+    "screenshots": [],
+    "repository": {
+      "repoOwner": "Casual76",
+      "repoName": "universal_converter",
+      "manifestPath": "manifest.json",
+      "ref": ""
+    },
+    "beta": {
+      "version": "2.0.0",
+      "releaseDate": "2026-08-22",
+      "changelog": "Riscrittura completa dell'app attorno allo stesso motore di conversione universale. Interfaccia nativa Material 3, avvio immediato e installazione da 70 a 13 MB: i motori pesanti (FFmpeg, Pandoc, Typst, ImageMagick) si scaricano solo la prima volta che servono davvero. Nuovo avanzamento che mostra l'intero percorso di conversione passo per passo, e visualizzatore integrato per confrontare originale e convertito. Nota: essendo cambiata la chiave di firma, va disinstallata la versione precedente prima di installare questa.",
+      "releaseTag": "beta-universal-converter-v2.0.0",
+      "apkAsset": "universal-converter-2.0.0.apk",
+      "exeAsset": "",
+      "sizeBytes": 13524440
+    },
+    "history": [
+      {
+        "version": "1.0.0",
+        "releaseDate": "2026-03-28",
+        "changelog": "Bozza generata automaticamente dal profilo Convert to it! per la versione 1.0.0. Asset rilevati: app-release.apk.",
+        "releaseTag": "beta-universal_converter-v1.0.0",
+        "apkAsset": "universal_converter-1.0.0.apk",
+        "exeAsset": "",
+        "sizeBytes": 0
+      }
+    ]
+  }
 }
