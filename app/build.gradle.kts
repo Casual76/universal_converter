@@ -220,8 +220,8 @@ android {
         applicationId = "com.p2r3.convert"
         minSdk = 29
         targetSdk = 36
-        versionCode = 4
-        versionName = "2.0.0"
+        versionCode = 5
+        versionName = "2.1.0"
 
         buildConfigField("String", "ENGINE_VERSION", "\"$engineVersion\"")
         buildConfigField("String", "ENGINE_ASSET_BASE_URL", "\"$engineAssetBaseUrl\"")
