@@ -2,3 +2,6 @@
 	path = convert
 	url = https://github.com/p2r3/convert.git
 	ignore = untracked
+[submodule "fluid-engine"]
+	path = fluid-engine
+	url = https://github.com/Casual76/fluid-engine.git

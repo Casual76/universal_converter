@@ -287,6 +287,9 @@ kotlin {
 tasks.named("preBuild") { dependsOn("engineSplitAssets") }
 
 dependencies {
+    // Fluid Engine: tema, tipografia e componenti condivisi con le altre app.
+    implementation(project(":engine-ui"))
+
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)

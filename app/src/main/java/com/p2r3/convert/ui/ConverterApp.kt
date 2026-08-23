@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import dev.antigravity.fluidengine.ui.fluid.ContinuousCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
@@ -225,7 +225,7 @@ private fun FileCard(
     Card(
         onClick = onPick,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
+        shape = ContinuousCornerShape(28.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (files.isEmpty()) MaterialTheme.colorScheme.surfaceContainerHigh
             else MaterialTheme.colorScheme.primaryContainer
@@ -313,7 +313,7 @@ private fun FormatSlot(
     Surface(
         modifier = modifier
             .height(96.dp)
-            .clip(RoundedCornerShape(24.dp))
+            .clip(ContinuousCornerShape(24.dp))
             .clickable(enabled = enabled, onClick = onClick),
         color = container
     ) {
