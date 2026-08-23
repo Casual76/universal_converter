@@ -15,13 +15,13 @@
       "ref": ""
     },
     "beta": {
-      "version": "2.0.0",
-      "releaseDate": "2026-08-22",
-      "changelog": "Riscrittura completa dell'app attorno allo stesso motore di conversione universale. Interfaccia nativa Material 3, avvio immediato e installazione da 70 a 13 MB: i motori pesanti (FFmpeg, Pandoc, Typst, ImageMagick) si scaricano solo la prima volta che servono davvero. Nuovo avanzamento che mostra l'intero percorso di conversione passo per passo, e visualizzatore integrato per confrontare originale e convertito. Nota: essendo cambiata la chiave di firma, va disinstallata la versione precedente prima di installare questa.",
-      "releaseTag": "beta-universal-converter-v2.0.0",
-      "apkAsset": "universal-converter-2.0.0.apk",
+      "version": "2.1.0",
+      "releaseDate": "2026-08-23",
+      "changelog": "Prima versione sul canale stabile. Le schermate sono passate al linguaggio condiviso con le altre app: il titolo grande si ritira nella barra mentre scorri, la barra e' in vetro, e le liste cedono in fondo invece di fermarsi di colpo. Le impostazioni sono ora raggruppate, con un controllo a tre posizioni per il tema al posto dei tre bottoni separati; lo stesso controllo serve nell'anteprima per passare fra originale e convertito. Il motore di conversione e quello che sa fare non sono cambiati.",
+      "releaseTag": "stable-universal-converter-v2.1.0",
+      "apkAsset": "universal-converter-2.1.0.apk",
       "exeAsset": "",
-      "sizeBytes": 13524440
+      "sizeBytes": 14792486
     },
     "history": [
       {
@@ -33,6 +33,15 @@
         "exeAsset": "",
         "sizeBytes": 0
       }
-    ]
+    ],
+    "stable": {
+      "version": "2.1.0",
+      "releaseDate": "2026-08-23",
+      "changelog": "Prima versione sul canale stabile. Le schermate sono passate al linguaggio condiviso con le altre app: il titolo grande si ritira nella barra mentre scorri, la barra e' in vetro, e le liste cedono in fondo invece di fermarsi di colpo. Le impostazioni sono ora raggruppate, con un controllo a tre posizioni per il tema al posto dei tre bottoni separati; lo stesso controllo serve nell'anteprima per passare fra originale e convertito. Il motore di conversione e quello che sa fare non sono cambiati.",
+      "releaseTag": "stable-universal-converter-v2.1.0",
+      "apkAsset": "universal-converter-2.1.0.apk",
+      "exeAsset": "",
+      "sizeBytes": 14792486
+    }
   }
 }
