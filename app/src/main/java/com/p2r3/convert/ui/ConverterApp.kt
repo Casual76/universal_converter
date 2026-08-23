@@ -195,13 +195,8 @@ private fun EngineBanner(status: EngineStatus, formatCount: Int) {
             }
         }
     }
-    if (status == EngineStatus.Ready && formatCount > 0) {
-        Text(
-            "$formatCount formati disponibili",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
+    // Il conteggio dei formati lo dice ora il sottotitolo della schermata, dove si ritira nella barra
+    // insieme al titolo. Dirlo due volte a due centimetri di distanza non era informazione in piu'.
 }
 
 @Composable

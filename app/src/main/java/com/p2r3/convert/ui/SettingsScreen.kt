@@ -90,7 +90,7 @@ fun SettingsScreen(
         item(key = "conversione") {
             FluidListGroup {
                 FluidListRow(
-                    title = "Modalita' semplice",
+                    title = "Modalità semplice",
                     subtitle = "Il motore sceglie da solo lo strumento migliore. " +
                         "Disattivala per selezionare a mano il singolo handler.",
                     badge = {
@@ -188,7 +188,7 @@ fun SettingsScreen(
             FluidSectionHeader(
                 title = "Crediti e licenza",
                 detail = "Le conversioni le fa \"Convert to it!\" di PortalRunner (p2r3) e dei suoi " +
-                    "collaboratori, usato senza modifiche. Questa app e' la scocca nativa che ci sta " +
+                    "collaboratori, usato senza modifiche. Questa app è la scocca nativa che ci sta " +
                     "intorno: il merito dei formati supportati e' loro.",
             )
         }
@@ -202,7 +202,7 @@ fun SettingsScreen(
                 FluidListDivider()
                 FluidListRow(
                     title = "Licenza GNU GPL v2",
-                    subtitle = "Il motore e' GPL-2.0, quindi lo e' anche questa app: " +
+                    subtitle = "Il motore è GPL-2.0, quindi lo è anche questa app: " +
                         "puoi usarla, studiarla, modificarla e ridistribuirla.",
                     onClick = { openUrl(context, LICENSE_URL) },
                 )
