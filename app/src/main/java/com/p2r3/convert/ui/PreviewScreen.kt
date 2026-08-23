@@ -22,9 +22,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -46,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import com.p2r3.convert.data.Preview
 import com.p2r3.convert.data.PreviewLoader
 import com.p2r3.convert.data.formatSize
+import dev.antigravity.fluidengine.ui.fluid.FluidSegmentedControl
 
 /**
  * Side by side look at what went in and what came out.
@@ -111,18 +109,16 @@ fun PreviewScreen(viewModel: ConverterViewModel, index: Int, onBack: () -> Unit)
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
-            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                SegmentedButton(
-                    selected = !showingOriginal,
-                    onClick = { showingOriginal = false },
-                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
-                ) { Text("Convertito") }
-                SegmentedButton(
-                    selected = showingOriginal,
-                    onClick = { showingOriginal = true },
-                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
-                ) { Text("Originale") }
-            }
+            // Il controllo dell'engine al posto di quello Material: la pillola scorre fra i due
+            // segmenti invece di accendersi sotto quello nuovo, ed e' quello che lo fa sembrare un
+            // oggetto solo con una parte mobile invece di due bottoni che si scambiano il turno.
+            FluidSegmentedControl(
+                options = listOf(false, true),
+                selected = showingOriginal,
+                onSelect = { showingOriginal = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { if (it) "Originale" else "Convertito" }
+            )
 
             Text(
                 buildString {

@@ -19,9 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import dev.antigravity.fluidengine.ui.fluid.ContinuousCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.automirrored.rounded.InsertDriveFile
@@ -42,16 +40,12 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,7 +54,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -72,6 +65,10 @@ import com.p2r3.convert.engine.ConversionStage
 import com.p2r3.convert.engine.EngineStatus
 import com.p2r3.convert.engine.FailureReason
 import com.p2r3.convert.engine.FormatOption
+import dev.antigravity.fluidengine.ui.fluid.FluidScreen
+import dev.antigravity.fluidengine.ui.fluid.FluidBarAction
+import dev.antigravity.fluidengine.ui.fluid.FluidButton
+import dev.antigravity.fluidengine.ui.fluid.FluidButtonSize
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,39 +88,31 @@ fun ConverterScreen(
         ActivityResultContracts.OpenMultipleDocuments()
     ) { uris -> viewModel.onFilesPicked(uris) }
 
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
-
-    Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            LargeTopAppBar(
-                title = { Text("Convert to it!") },
-                actions = {
-                    IconButton(onClick = onOpenSettings) {
-                        Icon(Icons.Rounded.Settings, contentDescription = "Impostazioni")
-                    }
-                },
-                scrollBehavior = scrollBehavior
+    // FluidScreen al posto di Scaffold + LargeTopAppBar: il titolo grande che si ritira nella barra,
+    // la barra in vetro che sfoca il contenuto che le passa sotto e il bordo elastico in fondo alla
+    // lista arrivano tutti da qui. Non sono cose che il tema puo' portare.
+    FluidScreen(
+        title = "Convert to it!",
+        subtitle = "${formats.size} formati disponibili",
+        actions = {
+            FluidBarAction(
+                icon = Icons.Rounded.Settings,
+                contentDescription = "Impostazioni",
+                onClick = onOpenSettings
             )
         }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
+    ) {
+        item(key = "engine-banner") { EngineBanner(engineStatus, formats.size) }
 
-            EngineBanner(engineStatus, formats.size)
-
+        item(key = "files") {
             FileCard(
                 files = state.files,
                 onPick = { filePicker.launch(arrayOf("*/*")) },
                 onClear = viewModel::clearFiles
             )
+        }
 
+        item(key = "formats") {
             FormatRow(
                 source = state.source,
                 target = state.target,
@@ -131,21 +120,20 @@ fun ConverterScreen(
                 onPickSource = { picking = PickerTarget.Source },
                 onPickTarget = { picking = PickerTarget.Target }
             )
+        }
 
-            Button(
+        item(key = "convert") {
+            FluidButton(
+                text = "Converti",
                 onClick = viewModel::convert,
                 enabled = state.canConvert,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-            ) {
-                Icon(Icons.Rounded.Bolt, contentDescription = null)
-                Spacer(Modifier.width(10.dp))
-                Text("Converti", style = MaterialTheme.typography.titleMedium)
-            }
-
-            PhaseSection(viewModel, state, onPreview)
+                size = FluidButtonSize.Large,
+                fillWidth = true,
+                leading = { Icon(Icons.Rounded.Bolt, contentDescription = null) }
+            )
         }
+
+        item(key = "phase") { PhaseSection(viewModel, state, onPreview) }
     }
 
     picking?.let { target ->
