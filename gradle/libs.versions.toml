@@ -1,21 +1,25 @@
+# Allineate al Fluid Engine 1.27.0 (fluid-engine/versions.gradle): Kotlin, Compose BOM,
+# serialization e datastore devono coincidere, altrimenti l'engine e l'app compilano contro due
+# librerie diverse nello stesso build e vince la piu' alta, che non e' quella su cui l'engine e'
+# stato provato.
 # Compose and lifecycle are held one line back on purpose: the 2026.08 BOM and
 # lifecycle 2.11 both demand AGP 9.1 and compileSdk 37, which would drag the
 # whole toolchain into a Gradle 9 migration. Bump them together with AGP.
 [versions]
 agp = "8.13.2"
-kotlin = "2.4.10"
-composeBom = "2026.03.01"
+kotlin = "2.2.20"
+composeBom = "2026.03.00"
 # Expressive APIs live on the 1.5.x line; the BOM still pins 1.4.0 stable.
 # alpha16 is the newest that still builds against compileSdk 36.
 material3 = "1.5.0-alpha16"
 activityCompose = "1.13.0"
 navigationCompose = "2.9.8"
 lifecycle = "2.10.0"
-coreKtx = "1.17.0"
+coreKtx = "1.18.0"
 webkit = "1.17.0"
-datastore = "1.2.1"
+datastore = "1.1.1"
 documentfile = "1.1.0"
-serialization = "1.11.0"
+serialization = "1.6.3"
 
 [libraries]
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }

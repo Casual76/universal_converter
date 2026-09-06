@@ -4,4 +4,8 @@
     <cache-path
         name="outputs"
         path="outputs/" />
+    <!-- I file che un tool consegna a PampAI/Aria: temporanei, leggibili solo dal chiamante. -->
+    <cache-path
+        name="ai_bridge"
+        path="ai-bridge/" />
 </paths>

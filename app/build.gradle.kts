@@ -220,8 +220,8 @@ android {
         applicationId = "com.p2r3.convert"
         minSdk = 29
         targetSdk = 36
-        versionCode = 5
-        versionName = "2.1.0"
+        versionCode = 6
+        versionName = "2.1.1"
 
         buildConfigField("String", "ENGINE_VERSION", "\"$engineVersion\"")
         buildConfigField("String", "ENGINE_ASSET_BASE_URL", "\"$engineAssetBaseUrl\"")
@@ -289,6 +289,9 @@ tasks.named("preBuild") { dependsOn("engineSplitAssets") }
 dependencies {
     // Fluid Engine: tema, tipografia e componenti condivisi con le altre app.
     implementation(project(":engine-ui"))
+    // I tipi dei tool e il ponte: il convertitore espone i suoi strumenti a PampAI/Aria.
+    implementation(project(":engine-ai"))
+    implementation(project(":engine-ai-bridge"))
 
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)

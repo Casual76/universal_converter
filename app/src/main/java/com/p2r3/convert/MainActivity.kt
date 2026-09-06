@@ -35,6 +35,13 @@ class MainActivity : ComponentActivity() {
     /** Files handed over by another app through the share sheet. */
     private val sharedFiles = MutableStateFlow<List<Uri>>(emptyList())
 
+    /**
+     * Il formato di arrivo chiesto da chi ci ha mandato il file (PampAI/Aria con
+     * `apri_convertitore`): si preseleziona da solo, cosi' chi arriva qui trova la conversione
+     * gia' impostata invece di doverla ripetere a mano.
+     */
+    private val requestedTarget = MutableStateFlow<String?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -50,6 +57,18 @@ class MainActivity : ComponentActivity() {
                         viewModel.onFilesPicked(uris)
                         sharedFiles.value = emptyList()
                     }
+                }
+            }
+
+            val formats by (application as ConvertApplication).engine.formats.collectAsStateWithLifecycle()
+            val target by requestedTarget.collectAsStateWithLifecycle()
+            LaunchedEffect(target, formats) {
+                val wanted = target?.lowercase()?.trim()?.removePrefix(".") ?: return@LaunchedEffect
+                val option = formats.firstOrNull { it.to && (it.extension.lowercase() == wanted || it.format.lowercase() == wanted) }
+                    ?: formats.firstOrNull { it.to && it.searchIndex.contains(wanted) }
+                if (option != null) {
+                    viewModel.selectTarget(option)
+                    requestedTarget.value = null
                 }
             }
 
@@ -117,6 +136,9 @@ class MainActivity : ComponentActivity() {
     /** Accepts a single file or a batch sent from another app. */
     @Suppress("DEPRECATION")
     private fun readSharedFiles(intent: Intent?) {
+        intent?.getStringExtra(com.p2r3.convert.pampai.OpenConverterTool.EXTRA_TARGET_FORMAT)
+            ?.takeIf { it.isNotBlank() }
+            ?.let { requestedTarget.value = it }
         val uris: List<Uri> = when (intent?.action) {
             Intent.ACTION_SEND ->
                 listOfNotNull(intent.getParcelableExtra(Intent.EXTRA_STREAM) as? Uri)
@@ -128,7 +150,10 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        if (isFinishing) (application as ConvertApplication).engine.release()
+        // Una conversione chiesta dall'assistente puo' essere ancora in volo: il motore vive nel
+        // processo, non nella schermata, e spegnerlo qui la ucciderebbe a meta'.
+        val engine = (application as ConvertApplication).engine
+        if (isFinishing && engine.jobsInFlight == 0) engine.release()
         super.onDestroy()
     }
 }

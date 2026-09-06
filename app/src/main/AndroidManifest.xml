@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Only used to fetch the heavy conversion engines the first time they run. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Una conversione chiesta dall'assistente continua anche con l'app chiusa. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- engine-ai porta il microfono per la voce dell'assistente: qui non serve a nessuno. -->
+    <uses-permission
+        android:name="android.permission.RECORD_AUDIO"
+        tools:node="remove" />
 
     <application
         android:name=".ConvertApplication"
@@ -48,6 +59,26 @@
                 <data android:mimeType="*/*" />
             </intent-filter>
         </activity>
+        <!--
+            Gli strumenti del convertitore per PampAI/Aria: permesso `signature`, quindi li chiama
+            solo un'app firmata con la stessa chiave. L'authority segue l'applicationId.
+        -->
+        <provider
+            android:name=".pampai.ConvertToolHostProvider"
+            android:authorities="${applicationId}.ai.tools"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:permission="dev.antigravity.fluidengine.permission.AI_TOOLS">
+            <meta-data
+                android:name="dev.antigravity.fluidengine.ai.TOOL_HOST"
+                android:value="1" />
+        </provider>
+
+        <!-- Tiene in piedi il motore mentre una conversione chiesta da fuori lavora. -->
+        <service
+            android:name=".pampai.ConversionService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
     </application>
 
 </manifest>

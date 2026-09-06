@@ -133,6 +133,18 @@ class ConversionEngine(context: Context) {
     /** State of every job the engine is working on right now. */
     private val jobs = ConcurrentHashMap<String, Job>()
 
+    /**
+     * Quanti lavori stanno girando adesso.
+     *
+     * Serve a chi tiene in piedi il motore: l'Activity non deve rilasciarlo mentre una conversione
+     * chiesta da fuori (l'assistente) sta ancora lavorando, e il servizio in primo piano si spegne
+     * solo quando questo torna a zero.
+     */
+    val jobsInFlight: Int get() = jobs.size
+
+    /** Vero se la WebView e' gia' in piedi: chi arriva dopo non ne crea una seconda. */
+    val isRunning: Boolean get() = webView != null
+
     private val outputRoot = File(appContext.cacheDir, "outputs")
 
     private class Job(val directory: File) {
