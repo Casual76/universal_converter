@@ -12,18 +12,26 @@
       "repoOwner": "Casual76",
       "repoName": "universal_converter",
       "manifestPath": "manifest.json",
-      "ref": ""
+      "ref": "main"
     },
     "beta": {
-      "version": "2.1.0",
-      "releaseDate": "2026-08-23",
-      "changelog": "Prima versione sul canale stabile. Le schermate sono passate al linguaggio condiviso con le altre app: il titolo grande si ritira nella barra mentre scorri, la barra e' in vetro, e le liste cedono in fondo invece di fermarsi di colpo. Le impostazioni sono ora raggruppate, con un controllo a tre posizioni per il tema al posto dei tre bottoni separati; lo stesso controllo serve nell'anteprima per passare fra originale e convertito. Il motore di conversione e quello che sa fare non sono cambiati.",
-      "releaseTag": "stable-universal-converter-v2.1.0",
-      "apkAsset": "universal-converter-2.1.0.apk",
-      "exeAsset": "",
-      "sizeBytes": 14792486
+      "version": "2.2.0",
+      "releaseDate": "2026-09-08",
+      "changelog": "Il convertitore parla con Aria: nove strumenti (quali formati esistono, cosa si puo' ottenere da un file, la conversione vera con conferma, lo stato e l'annullamento, l'apertura sul formato scelto, lo stato del motore, i pacchetti, la condivisione) e un servizio che sveglia il motore anche ad app chiusa.",
+      "releaseTag": "stable-universal-converter-v2.2.0",
+      "apkAsset": "universal-converter-2.2.0.apk",
+      "sizeBytes": 14947609
     },
     "history": [
+      {
+        "version": "2.1.0",
+        "releaseDate": "2026-08-23",
+        "changelog": "Prima versione sul canale stabile. Le schermate sono passate al linguaggio condiviso con le altre app: il titolo grande si ritira nella barra mentre scorri, la barra e' in vetro, e le liste cedono in fondo invece di fermarsi di colpo. Le impostazioni sono ora raggruppate, con un controllo a tre posizioni per il tema al posto dei tre bottoni separati; lo stesso controllo serve nell'anteprima per passare fra originale e convertito. Il motore di conversione e quello che sa fare non sono cambiati.",
+        "releaseTag": "stable-universal-converter-v2.1.0",
+        "apkAsset": "universal-converter-2.1.0.apk",
+        "exeAsset": "",
+        "sizeBytes": 14792486
+      },
       {
         "version": "1.0.0",
         "releaseDate": "2026-03-28",
@@ -35,13 +43,12 @@
       }
     ],
     "stable": {
-      "version": "2.1.0",
-      "releaseDate": "2026-08-23",
-      "changelog": "Prima versione sul canale stabile. Le schermate sono passate al linguaggio condiviso con le altre app: il titolo grande si ritira nella barra mentre scorri, la barra e' in vetro, e le liste cedono in fondo invece di fermarsi di colpo. Le impostazioni sono ora raggruppate, con un controllo a tre posizioni per il tema al posto dei tre bottoni separati; lo stesso controllo serve nell'anteprima per passare fra originale e convertito. Il motore di conversione e quello che sa fare non sono cambiati.",
-      "releaseTag": "stable-universal-converter-v2.1.0",
-      "apkAsset": "universal-converter-2.1.0.apk",
-      "exeAsset": "",
-      "sizeBytes": 14792486
+      "version": "2.2.0",
+      "releaseDate": "2026-09-08",
+      "changelog": "Il convertitore parla con Aria: nove strumenti (quali formati esistono, cosa si puo' ottenere da un file, la conversione vera con conferma, lo stato e l'annullamento, l'apertura sul formato scelto, lo stato del motore, i pacchetti, la condivisione) e un servizio che sveglia il motore anche ad app chiusa.",
+      "releaseTag": "stable-universal-converter-v2.2.0",
+      "apkAsset": "universal-converter-2.2.0.apk",
+      "sizeBytes": 14947609
     }
   }
 }
