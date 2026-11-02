@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -107,15 +108,18 @@ class MainActivity : ComponentActivity() {
             Box(Modifier.fillMaxSize()) {
                 // The engine lives here: a full size, fully transparent WebView. Handlers that
                 // rasterise DOM content need a real laid out page, so it stays in the tree instead
-                // of running detached. The pages above are opaque, so it is never seen.
-                AndroidView(
-                    factory = { context ->
-                        (application as ConvertApplication).engine.createWebView(context)
-                    },
-                    modifier = Modifier
-                        .matchParentSize()
-                        .alpha(0f),
-                )
+                // of running detached. The pages above are opaque, so it is never seen. Keyed on the
+                // engine's generation: if the page process dies, a fresh WebView takes its place.
+                val engine = (application as ConvertApplication).engine
+                val generation by engine.generation.collectAsStateWithLifecycle()
+                key(generation) {
+                    AndroidView(
+                        factory = { context -> engine.createWebView(context) },
+                        modifier = Modifier
+                            .matchParentSize()
+                            .alpha(0f),
+                    )
+                }
 
                 ProvideFluidChrome(controller = chrome, bottomInset = 0.dp, scrollToTop = scrollToTop) {
                     // Le pagine dell'engine (3.0): opache, da destra, e il back sotto il dito. La

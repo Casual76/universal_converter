@@ -30,9 +30,11 @@ import androidx.compose.material.icons.rounded.TableChart
 import androidx.compose.material.icons.rounded.VideoFile
 import androidx.compose.material.icons.rounded.ViewInAr
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -89,13 +91,17 @@ fun FormatPicker(
         presentation = FluidGlassModalPresentation.Popover,
         paneTitle = target?.let(::pickerTitle),
     ) { side ->
-        FormatPickerPane(
-            side = side,
-            formats = formats,
-            simpleMode = simpleMode,
-            preselected = preselected(side),
-            onSelect = { onSelect(side, it) },
-        )
+        // Il pannello del pop-up non da' un colore al contenuto (lo da' il foglio, non il pop-up):
+        // senza, il titolo nel tema scuro e' nero su vetro scuro.
+        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
+            FormatPickerPane(
+                side = side,
+                formats = formats,
+                simpleMode = simpleMode,
+                preselected = preselected(side),
+                onSelect = { onSelect(side, it) },
+            )
+        }
     }
 }
 

@@ -197,8 +197,8 @@ fun ConverterScreen(
 private fun EngineNotice(status: EngineStatus, onOpenLog: () -> Unit, modifier: Modifier = Modifier) {
     if (status == EngineStatus.Broken) {
         FluidInlineMessage(
-            title = "Il motore non è partito",
-            message = "Riapri l'app; se il problema resta, il log dice cosa è successo.",
+            title = "Il motore si è fermato",
+            message = "Si riavvia da solo; se resta fermo, riapri l'app. Il log dice cosa è successo.",
             tone = FluidTone.Danger,
             onClick = onOpenLog,
             action = "Apri il log",

@@ -7,7 +7,9 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.util.Base64
 import android.util.Log
+import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
@@ -125,7 +127,16 @@ class ConversionEngine(context: Context) {
     private val _logs = MutableSharedFlow<String>(replay = 120, extraBufferCapacity = 240)
     val logs: SharedFlow<String> = _logs
 
-    private val ready = CompletableDeferred<Unit>()
+    private var ready = CompletableDeferred<Unit>()
+
+    private val _generation = MutableStateFlow(0)
+
+    /**
+     * Quante volte il motore e' stato rifatto da capo. Cresce quando il processo della WebView muore
+     * (vedi [onEngineGone]): chi monta la WebView la rimonta con questa chiave, e il motore riparte da
+     * solo invece di lasciare l'app ferma su una pagina che non risponde piu'.
+     */
+    val generation: StateFlow<Int> = _generation.asStateFlow()
 
     /** Input files currently exposed to the page, keyed by a random token. */
     private val servedInputs = ConcurrentHashMap<String, Uri>()
@@ -226,6 +237,13 @@ class ConversionEngine(context: Context) {
                     openBinaryChannel(view)
                     view.evaluateJavascript("window.ConvertEngine.boot()", null)
                 }
+
+                // Il processo della pagina puo' morire: una ricerca di percorso enorme che finisce la
+                // memoria, o il sistema che lo chiude. Senza questa risposta Android chiude tutta l'app.
+                override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {
+                    onEngineGone(view, detail.didCrash())
+                    return true
+                }
             }
         }
 
@@ -235,6 +253,38 @@ class ConversionEngine(context: Context) {
         _status.value = EngineStatus.Booting
         view.loadUrl("https://$DOMAIN/convert/engine.html")
         return view
+    }
+
+    /**
+     * Il processo del motore e' morto. I lavori in corso finiscono con un errore che lo dice, la
+     * WebView morta si toglie dalla gerarchia e si distrugge (lo chiede Android), e [generation] sale:
+     * chi la montava ne crea un'altra, che si riavvia come all'apertura dell'app.
+     */
+    private fun onEngineGone(view: WebView, crashed: Boolean) {
+        _logs.tryEmit(
+            "fatal: il processo del motore si e' fermato" +
+                if (crashed) " (crash: spesso memoria esaurita)" else " (chiuso dal sistema)",
+        )
+        jobs.values.forEach {
+            it.deferred.complete(
+                ConversionResult.Failure(
+                    FailureReason.Engine,
+                    "Il motore si e' fermato a meta' (spesso e' la memoria che finisce, con percorsi molto lunghi). " +
+                        "Si sta riavviando: riprova, o scegli un formato di arrivo piu' vicino.",
+                ),
+            )
+        }
+        if (webView === view) {
+            nativePort?.close()
+            nativePort = null
+            webView = null
+            // Chi stava gia' aspettando il motore (lo stava avviando) continua ad aspettare il prossimo.
+            if (ready.isCompleted) ready = CompletableDeferred()
+        }
+        (view.parent as? ViewGroup)?.removeView(view)
+        view.destroy()
+        _status.value = EngineStatus.Broken
+        _generation.value += 1
     }
 
     fun release() {

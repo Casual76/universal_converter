@@ -17,9 +17,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.HideImage
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,6 +64,16 @@ import dev.antigravity.fluidengine.ui.theme.FluidEmptyState
  */
 @Composable
 fun PreviewScreen(viewModel: ConverterViewModel, index: Int, onBack: () -> Unit) {
+    // Una pagina che non e' una FluidScreen non riceve il colore del contenuto: lo danno qui, per il
+    // testo dell'anteprima e per la barra che l'host disegna con il contesto di questa pagina (nel
+    // tema scuro il titolo e il testo erano neri sul fondo scuro).
+    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onBackground) {
+        PreviewPage(viewModel, index, onBack)
+    }
+}
+
+@Composable
+private fun PreviewPage(viewModel: ConverterViewModel, index: Int, onBack: () -> Unit) {
 
     val context = LocalContext.current
     val pair = remember(index) { viewModel.previewPair(index) }
