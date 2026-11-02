@@ -1,4 +1,4 @@
-# Allineate al Fluid Engine 1.27.0 (fluid-engine/versions.gradle): Kotlin, Compose BOM,
+# Allineate al Fluid Engine 3.0.0-rc.1 (fluid-engine/versions.gradle): Kotlin, Compose BOM,
 # serialization e datastore devono coincidere, altrimenti l'engine e l'app compilano contro due
 # librerie diverse nello stesso build e vince la piu' alta, che non e' quella su cui l'engine e'
 # stato provato.
@@ -20,6 +20,7 @@ webkit = "1.17.0"
 datastore = "1.1.1"
 documentfile = "1.1.0"
 serialization = "1.6.3"
+junit = "4.13.2"
 
 [libraries]
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -40,6 +41,7 @@ core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx"
 webkit = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
 
 [plugins]

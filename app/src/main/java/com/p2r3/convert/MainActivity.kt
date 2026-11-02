@@ -6,28 +6,36 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.p2r3.convert.ui.ConverterScreen
 import com.p2r3.convert.ui.ConverterViewModel
 import com.p2r3.convert.ui.LogScreen
 import com.p2r3.convert.ui.PreviewScreen
 import com.p2r3.convert.ui.SettingsScreen
 import com.p2r3.convert.ui.theme.ConvertTheme
+import dev.antigravity.fluidengine.ui.fluid.FluidGlassModalHost
+import dev.antigravity.fluidengine.ui.fluid.FluidScrollToTopBus
+import dev.antigravity.fluidengine.ui.fluid.LocalFluidGlassModalHostState
+import dev.antigravity.fluidengine.ui.fluid.ProvideFluidChrome
+import dev.antigravity.fluidengine.ui.fluid.fluidGlassModalObscured
+import dev.antigravity.fluidengine.ui.fluid.rememberFluidChromeController
+import dev.antigravity.fluidengine.ui.fluid.rememberFluidGlassModalHostState
+import dev.antigravity.fluidengine.ui.fluid.rememberGlassBackdrop
+import dev.antigravity.fluidengine.ui.navigation.FluidNavHost
+import dev.antigravity.fluidengine.ui.navigation.composable
+import dev.antigravity.fluidengine.ui.navigation.rememberFluidNavController
+import dev.antigravity.fluidengine.ui.page.FluidBackSwipe
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class MainActivity : ComponentActivity() {
@@ -72,58 +80,87 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            ConvertTheme(themeMode = settings.themeMode, dynamicColor = settings.dynamicColor) {
-                Box(Modifier.fillMaxSize()) {
-                    // The engine lives here: a full size, fully transparent WebView.
-                    // Handlers that rasterise DOM content need a real laid out page,
-                    // so it stays in the tree instead of running detached.
-                    AndroidView(
-                        factory = { context ->
-                            (application as ConvertApplication).engine.createWebView(context)
-                        },
-                        modifier = Modifier
-                            .matchParentSize()
-                            .alpha(0f)
-                    )
+            ConvertTheme(settings = settings) {
+                ConvertRoot(viewModel)
+            }
+        }
+    }
 
-                    val navController = rememberNavController()
-                    NavHost(
+    /**
+     * La radice, nella forma che ha la galleria dell'engine: il motore sotto tutto, le pagine sopra, e
+     * l'host dei modali sopra le pagine.
+     *
+     * L'host sta alla radice e non dentro una pagina perche' il selettore dei formati, gli avvisi e i
+     * menu delle righe sono pannelli di vetro che rifrangono la pagina da cui nascono: un pannello
+     * dentro la pagina sarebbe parte di quello che rifrange.
+     */
+    @androidx.compose.runtime.Composable
+    private fun ConvertRoot(viewModel: ConverterViewModel) {
+        val modalHost = rememberFluidGlassModalHostState()
+        val chrome = rememberFluidChromeController()
+        val scrollToTop = remember { FluidScrollToTopBus() }
+        val fallbackBackdrop = rememberGlassBackdrop()
+        val backdrop = chrome.activeBackdrop.value ?: fallbackBackdrop
+        val navController = rememberFluidNavController()
+
+        CompositionLocalProvider(LocalFluidGlassModalHostState provides modalHost) {
+            Box(Modifier.fillMaxSize()) {
+                // The engine lives here: a full size, fully transparent WebView. Handlers that
+                // rasterise DOM content need a real laid out page, so it stays in the tree instead
+                // of running detached. The pages above are opaque, so it is never seen.
+                AndroidView(
+                    factory = { context ->
+                        (application as ConvertApplication).engine.createWebView(context)
+                    },
+                    modifier = Modifier
+                        .matchParentSize()
+                        .alpha(0f),
+                )
+
+                ProvideFluidChrome(controller = chrome, bottomInset = 0.dp, scrollToTop = scrollToTop) {
+                    // Le pagine dell'engine (3.0): opache, da destra, e il back sotto il dito. La
+                    // barra e' una sola, ancorata, e la descrive ogni pagina.
+                    FluidNavHost(
                         navController = navController,
-                        startDestination = "converter",
-                        enterTransition = { slideInHorizontally { it / 4 } + fadeIn() },
-                        exitTransition = { slideOutHorizontally { -it / 6 } + fadeOut() },
-                        popEnterTransition = { slideInHorizontally { -it / 6 } + fadeIn() },
-                        popExitTransition = { slideOutHorizontally { it / 4 } + fadeOut() }
+                        startDestination = RouteConverter,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .fluidGlassModalObscured(),
                     ) {
-                        composable("converter") {
+                        composable(RouteConverter) {
                             ConverterScreen(
                                 viewModel = viewModel,
-                                onOpenSettings = { navController.navigate("settings") },
-                                onPreview = { index -> navController.navigate("preview/$index") }
+                                onOpenSettings = { navController.navigate(RouteSettings) },
+                                onOpenLog = { navController.navigate(RouteLog) },
+                                onPreview = { index -> navController.navigate("$RoutePreview/$index") },
                             )
                         }
-                        composable("settings") {
+                        composable(RouteSettings) {
                             SettingsScreen(
                                 viewModel = viewModel,
                                 onBack = { navController.popBackStack() },
-                                onOpenLog = { navController.navigate("log") }
+                                onOpenLog = { navController.navigate(RouteLog) },
                             )
                         }
-                        composable("preview/{index}") { entry ->
+                        // Un visore con i suoi gesti (pizzico, spostamento, tieni premuto per
+                        // confrontare, testo che scorre di lato): il back a dito parte dal bordo.
+                        composable("$RoutePreview/{index}", backSwipe = FluidBackSwipe.EdgeOnly) { entry ->
                             PreviewScreen(
                                 viewModel = viewModel,
                                 index = entry.arguments?.getString("index")?.toIntOrNull() ?: 0,
-                                onBack = { navController.popBackStack() }
+                                onBack = { navController.popBackStack() },
                             )
                         }
-                        composable("log") {
+                        composable(RouteLog) {
                             LogScreen(
                                 viewModel = viewModel,
-                                onBack = { navController.popBackStack() }
+                                onBack = { navController.popBackStack() },
                             )
                         }
                     }
                 }
+
+                FluidGlassModalHost(state = modalHost, backdrop = backdrop)
             }
         }
     }
@@ -155,5 +192,12 @@ class MainActivity : ComponentActivity() {
         val engine = (application as ConvertApplication).engine
         if (isFinishing && engine.jobsInFlight == 0) engine.release()
         super.onDestroy()
+    }
+
+    private companion object {
+        const val RouteConverter = "converter"
+        const val RouteSettings = "settings"
+        const val RoutePreview = "preview"
+        const val RouteLog = "log"
     }
 }

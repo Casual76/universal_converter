@@ -115,6 +115,8 @@ dependencies {
     // I tipi dei tool e il ponte: il convertitore espone i suoi strumenti a PampAI/Aria.
     implementation(project(":engine-ai"))
     implementation(project(":engine-ai-bridge"))
+    // L'aggiornamento in-app dal manifest che legge anche il Pampa Store (porta con se' engine-net).
+    implementation(project(":engine-update"))
 
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
@@ -136,4 +138,6 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     debugImplementation(libs.compose.ui.tooling)
+
+    testImplementation(libs.junit)
 }

@@ -6,8 +6,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.p2r3.convert.ConvertApplication
 import com.p2r3.convert.data.PickedFile
+import com.p2r3.convert.BuildConfig
 import com.p2r3.convert.data.Settings
-import com.p2r3.convert.data.ThemeMode
 import com.p2r3.convert.engine.ConversionProgress
 import com.p2r3.convert.engine.ConversionResult
 import com.p2r3.convert.engine.ConversionStage
@@ -16,6 +16,14 @@ import com.p2r3.convert.engine.EngineStatus
 import com.p2r3.convert.engine.FailureReason
 import com.p2r3.convert.engine.FormatOption
 import com.p2r3.convert.engine.InputFile
+import com.p2r3.convert.ui.theme.ConvertAppearance
+import com.p2r3.convert.update.convertUpdater
+import dev.antigravity.fluidengine.foundation.AvailableAppUpdate
+import dev.antigravity.fluidengine.foundation.EngineSettings
+import dev.antigravity.fluidengine.ui.fluid.FluidUpdateUiState
+import dev.antigravity.fluidengine.ui.fluid.isBusy
+import dev.antigravity.fluidengine.ui.fluid.toFluidUpdateRelease
+import dev.antigravity.fluidengine.ui.fluid.toFluidUpdateState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -88,16 +96,9 @@ class ConverterViewModel(application: Application) : AndroidViewModel(applicatio
         _state.value = ConverterState(target = _state.value.target)
     }
 
-    /** Picks the input format the same way the web UI does: extension, then MIME. */
-    private fun detectFormat(file: PickedFile): FormatOption? {
-        val options = formats.value.filter { it.from }
-        if (options.isEmpty()) return null
-        val byExtension = options.filter { it.extension.equals(file.extension, ignoreCase = true) }
-        if (byExtension.isNotEmpty()) {
-            return byExtension.firstOrNull { it.mime.equals(file.mimeType, ignoreCase = true) } ?: byExtension.first()
-        }
-        return options.firstOrNull { it.mime.equals(file.mimeType, ignoreCase = true) }
-    }
+    /** Il formato di partenza dal nome e dal tipo del file: vedi [FormatCatalog.detect]. */
+    private fun detectFormat(file: PickedFile): FormatOption? =
+        FormatCatalog.detect(formats.value, file.extension, file.mimeType)
 
     fun selectSource(option: FormatOption) {
         _state.value = _state.value.copy(source = option)
@@ -169,6 +170,9 @@ class ConverterViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun shareIntent() = (_state.value.phase as? ConversionPhase.Done)?.let { gateway.shareIntent(it.files) }
 
+    /** Condivide solo questi file (il menu di una riga del risultato). */
+    fun shareIntent(files: List<ConvertedFile>) = gateway.shareIntent(files)
+
     fun openIntent(file: ConvertedFile) = gateway.openIntent(file)
 
     /**
@@ -196,9 +200,59 @@ class ConverterViewModel(application: Application) : AndroidViewModel(applicatio
     /* ---------------------------------------------------------------------- */
 
     fun setSimpleMode(value: Boolean) { viewModelScope.launch { app.settingsStore.setSimpleMode(value) } }
-    fun setThemeMode(value: ThemeMode) { viewModelScope.launch { app.settingsStore.setThemeMode(value) } }
-    fun setDynamicColor(value: Boolean) { viewModelScope.launch { app.settingsStore.setDynamicColor(value) } }
     fun setAutoSave(value: Boolean) { viewModelScope.launch { app.settingsStore.setAutoSave(value) } }
+
+    /**
+     * Quello che la sezione «Aspetto» dell'engine ha scritto (tema, nero, accento, aptica), riportato
+     * nelle impostazioni dell'app con [ConvertAppearance.fromEngine].
+     */
+    fun setAppearance(value: EngineSettings) {
+        val next = ConvertAppearance.fromEngine(settings.value, value)
+        if (next != settings.value) viewModelScope.launch { app.settingsStore.setAppearance(next) }
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /* In-app updates                                                         */
+    /* ---------------------------------------------------------------------- */
+
+    private val updater by lazy { convertUpdater(app) }
+    private var availableUpdate: AvailableAppUpdate? = null
+
+    private val _update = MutableStateFlow<FluidUpdateUiState>(FluidUpdateUiState.Idle)
+    /** Lo stato dell'aggiornamento in-app, per la sezione delle impostazioni. */
+    val update: StateFlow<FluidUpdateUiState> = _update.asStateFlow()
+
+    private val _lastUpdateCheck = MutableStateFlow<Long?>(null)
+    val lastUpdateCheck: StateFlow<Long?> = _lastUpdateCheck.asStateFlow()
+
+    /**
+     * Controlla il manifest pubblicato, quello che legge anche il Pampa Store: una fonte sola, quindi
+     * lo store e l'app non possono proporre due versioni diverse. Solo a richiesta: l'app non va in
+     * rete da sola per questo.
+     */
+    fun checkForUpdate() {
+        if (_update.value.isBusy) return
+        _update.value = FluidUpdateUiState.Checking
+        viewModelScope.launch {
+            updater.check(currentVersionName = BuildConfig.VERSION_NAME)
+                .onSuccess { found ->
+                    availableUpdate = found
+                    _update.value = found?.let { FluidUpdateUiState.Available(it.toFluidUpdateRelease()) }
+                        ?: FluidUpdateUiState.UpToDate
+                }
+                .onFailure { _update.value = FluidUpdateUiState.CheckFailed(it.message) }
+            _lastUpdateCheck.value = System.currentTimeMillis()
+        }
+    }
+
+    fun installUpdate() {
+        val update = availableUpdate ?: return
+        if (_update.value.isBusy) return
+        val release = update.toFluidUpdateRelease()
+        viewModelScope.launch {
+            updater.install(update).collect { state -> _update.value = state.toFluidUpdateState(release) }
+        }
+    }
 
     /* ---------------------------------------------------------------------- */
     /* Engine downloads                                                       */
