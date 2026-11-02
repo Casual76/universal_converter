@@ -60,15 +60,16 @@
             </intent-filter>
         </activity>
         <!--
-            Gli strumenti del convertitore per PampAI/Aria: permesso `signature`, quindi li chiama
-            solo un'app firmata con la stessa chiave. L'authority segue l'applicationId.
+            Gli strumenti del convertitore per PampAI/Aria: li chiama solo un'app firmata con la
+            stessa chiave. Dall'engine 3.0.0-rc.2 non c'e' piu' un permesso `signature` (dichiarato da
+            ogni app, impediva di installarne due con firme diverse): il provider controlla la firma
+            di chi chiama a ogni chiamata. L'authority segue l'applicationId.
         -->
         <provider
             android:name=".pampai.ConvertToolHostProvider"
             android:authorities="${applicationId}.ai.tools"
             android:exported="true"
-            android:grantUriPermissions="true"
-            android:permission="dev.antigravity.fluidengine.permission.AI_TOOLS">
+            android:grantUriPermissions="true">
             <meta-data
                 android:name="dev.antigravity.fluidengine.ai.TOOL_HOST"
                 android:value="1" />
