@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Part of the conversion engine (p2r3/convert plus this headless bridge), a separate program
+// from the Android app: see engine/LICENSE and README.md.
 /**
  * Headless entry point for the Android shell.
  *
