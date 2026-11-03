@@ -262,15 +262,15 @@ class ConversionEngine(context: Context) {
      */
     private fun onEngineGone(view: WebView, crashed: Boolean) {
         _logs.tryEmit(
-            "fatal: il processo del motore si e' fermato" +
+            "fatal: il processo del motore si è fermato" +
                 if (crashed) " (crash: spesso memoria esaurita)" else " (chiuso dal sistema)",
         )
         jobs.values.forEach {
             it.deferred.complete(
                 ConversionResult.Failure(
                     FailureReason.Engine,
-                    "Il motore si e' fermato a meta' (spesso e' la memoria che finisce, con percorsi molto lunghi). " +
-                        "Si sta riavviando: riprova, o scegli un formato di arrivo piu' vicino.",
+                    "Il motore si è fermato a metà (spesso è la memoria che finisce, con percorsi molto lunghi). " +
+                        "Si sta riavviando: riprova, o scegli un formato di arrivo più vicino.",
                 ),
             )
         }
