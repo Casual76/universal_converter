@@ -15,14 +15,22 @@
       "ref": "main"
     },
     "beta": {
-      "version": "2.2.0",
-      "releaseDate": "2026-09-08",
-      "changelog": "Il convertitore parla con Aria: nove strumenti (quali formati esistono, cosa si puo' ottenere da un file, la conversione vera con conferma, lo stato e l'annullamento, l'apertura sul formato scelto, lo stato del motore, i pacchetti, la condivisione) e un servizio che sveglia il motore anche ad app chiusa.",
-      "releaseTag": "stable-universal-converter-v2.2.0",
-      "apkAsset": "universal-converter-2.2.0.apk",
-      "sizeBytes": 14947609
+      "version": "3.0.0",
+      "releaseDate": "2026-11-03",
+      "changelog": "Convert to it! 3.0: tutte le schermate rifatte sul Fluid Engine 3 (selettore dei formati che nasce dalla tessera, risultati con menu liquido, anteprima con zoom); il motore di conversione si riprende da solo se si ferma. App GPL-3.0, motore di conversione GPL-2.0 come programma a parte.",
+      "releaseTag": "stable-universal-converter-v3.0.0",
+      "apkAsset": "universal-converter-3.0.0.apk",
+      "sizeBytes": 15184260
     },
     "history": [
+      {
+        "version": "2.2.0",
+        "releaseDate": "2026-09-08",
+        "changelog": "Il convertitore parla con Aria: nove strumenti (quali formati esistono, cosa si puo' ottenere da un file, la conversione vera con conferma, lo stato e l'annullamento, l'apertura sul formato scelto, lo stato del motore, i pacchetti, la condivisione) e un servizio che sveglia il motore anche ad app chiusa.",
+        "releaseTag": "stable-universal-converter-v2.2.0",
+        "apkAsset": "universal-converter-2.2.0.apk",
+        "sizeBytes": 14947609
+      },
       {
         "version": "2.1.0",
         "releaseDate": "2026-08-23",
@@ -43,12 +51,12 @@
       }
     ],
     "stable": {
-      "version": "2.2.0",
-      "releaseDate": "2026-09-08",
-      "changelog": "Il convertitore parla con Aria: nove strumenti (quali formati esistono, cosa si puo' ottenere da un file, la conversione vera con conferma, lo stato e l'annullamento, l'apertura sul formato scelto, lo stato del motore, i pacchetti, la condivisione) e un servizio che sveglia il motore anche ad app chiusa.",
-      "releaseTag": "stable-universal-converter-v2.2.0",
-      "apkAsset": "universal-converter-2.2.0.apk",
-      "sizeBytes": 14947609
+      "version": "3.0.0",
+      "releaseDate": "2026-11-03",
+      "changelog": "Convert to it! 3.0: tutte le schermate rifatte sul Fluid Engine 3 (selettore dei formati che nasce dalla tessera, risultati con menu liquido, anteprima con zoom); il motore di conversione si riprende da solo se si ferma. App GPL-3.0, motore di conversione GPL-2.0 come programma a parte.",
+      "releaseTag": "stable-universal-converter-v3.0.0",
+      "apkAsset": "universal-converter-3.0.0.apk",
+      "sizeBytes": 15184260
     }
   }
 }
